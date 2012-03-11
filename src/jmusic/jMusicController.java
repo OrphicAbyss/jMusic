@@ -16,6 +16,7 @@
  */
 package jmusic;
 
+import jmusic.ui.jMusic;
 import javax.swing.JOptionPane;
 import jmusic.config.DataStorage;
 import jmusic.config.DataStorageProperties;

@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jmusic;
+package jmusic.ui;
 
+import jmusic.ui.JTableAltRows;
 import img.LoadImage;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -30,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import jmusic.jMusicController;
 import jmusic.playback.MusicPlayer;
 import jmusic.playlist.table.MusicTableModel;
 import jmusic.util.FileCompareSize;
@@ -72,7 +74,7 @@ public class jMusic extends javax.swing.JFrame {
 		jToggleButtonForward.setIcon(forward);
 		jButtonSettings.setIcon(settings);
 		
-		jTable1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		jTablePlaylist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
 		final String folder = jMusicController.getDataStorage().get("MusicFolder");
 		
@@ -155,7 +157,7 @@ public class jMusic extends javax.swing.JFrame {
         jButtonSettings = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jTablePlaylist = new JTableAltRows();
         jPanelSidebar = new javax.swing.JPanel();
         jLabelAlbumArt = new javax.swing.JLabel();
 
@@ -235,7 +237,7 @@ public class jMusic extends javax.swing.JFrame {
 
         jSplitPane1.setDividerLocation(256);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        jTablePlaylist.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -243,12 +245,13 @@ public class jMusic extends javax.swing.JFrame {
 
             }
         ));
-        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+        jTablePlaylist.setGridColor(jTablePlaylist.getBackground());
+        jTablePlaylist.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jTableRowClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(jTablePlaylist);
 
         jSplitPane1.setRightComponent(jScrollPane1);
 
@@ -307,7 +310,7 @@ public class jMusic extends javax.swing.JFrame {
                     .addComponent(jToggleButtonForward, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButtonSettings, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 504, Short.MAX_VALUE))
+                .addComponent(jSplitPane1))
         );
 
         pack();
@@ -320,18 +323,18 @@ public class jMusic extends javax.swing.JFrame {
 	}
 	
 	public void updatePlaylistModel(AbstractTableModel playlistModel){
-		jTable1.setModel(playlistModel);
+		jTablePlaylist.setModel(playlistModel);
 	}
 		
 	private void playFile(){
 		jToggleButtonPlay.setSelected(true);
-		int selected = jTable1.getSelectedRow();
+		int selected = jTablePlaylist.getSelectedRow();
 		if (selected == -1){
-			jTable1.addRowSelectionInterval(0, 0);
-			selected = jTable1.getSelectedRow();
+			jTablePlaylist.addRowSelectionInterval(0, 0);
+			selected = jTablePlaylist.getSelectedRow();
 		}
 		
-		File file = (File)((MusicTableModel)jTable1.getModel()).getRow(selected).getFile();
+		File file = (File)((MusicTableModel)jTablePlaylist.getModel()).getRow(selected).getFile();
 		jMusicController.getMusicPlayer().play(file);
 		String path = file.getParent();
 		
@@ -382,7 +385,7 @@ public class jMusic extends javax.swing.JFrame {
 
 	private void toggleButtonPress(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toggleButtonPress
 		String buttonName = ((AbstractButton)evt.getSource()).getName();
-		int currentRow = jTable1.getSelectedRow();
+		int currentRow = jTablePlaylist.getSelectedRow();
 		switch (buttonName) {
 			case "Play":
 				MusicPlayer mp = jMusicController.getMusicPlayer();
@@ -411,9 +414,9 @@ public class jMusic extends javax.swing.JFrame {
 			case "Forward":
 				jMusicController.getMusicPlayer().stop();
 				currentRow++;
-				if (currentRow >= jTable1.getRowCount())
+				if (currentRow >= jTablePlaylist.getRowCount())
 					currentRow = 0;
-				jTable1.setRowSelectionInterval(currentRow, currentRow);
+				jTablePlaylist.setRowSelectionInterval(currentRow, currentRow);
 				jToggleButtonForward.setSelected(false);
 				playFile();
 				break;
@@ -421,8 +424,8 @@ public class jMusic extends javax.swing.JFrame {
 				jMusicController.getMusicPlayer().stop();
 				currentRow--;
 				if (currentRow <= 0)
-					currentRow = jTable1.getRowCount() - 1;
-				jTable1.setRowSelectionInterval(currentRow, currentRow);
+					currentRow = jTablePlaylist.getRowCount() - 1;
+				jTablePlaylist.setRowSelectionInterval(currentRow, currentRow);
 				jToggleButtonBackward.setSelected(false);
 				playFile();
 				break;
@@ -459,7 +462,7 @@ public class jMusic extends javax.swing.JFrame {
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTablePlaylist;
     private javax.swing.JToggleButton jToggleButtonBackward;
     private javax.swing.JToggleButton jToggleButtonForward;
     private javax.swing.JToggleButton jToggleButtonPlay;

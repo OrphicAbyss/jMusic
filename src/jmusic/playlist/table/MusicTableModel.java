@@ -19,8 +19,8 @@ package jmusic.playlist.table;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import jmusic.Metadata;
-import jmusic.MetadataLoader;
+import jmusic.playlist.Metadata;
+import jmusic.playlist.MetadataLoader;
 
 /**
  * This holds our play list data

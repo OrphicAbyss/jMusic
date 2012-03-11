@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jmusic;
+package jmusic.ui;
 
 import java.io.File;
 import javax.swing.JFileChooser;
+import jmusic.jMusicController;
 
 /**
  *

@@ -17,7 +17,7 @@
 package jmusic.playlist.table;
 
 import java.io.File;
-import jmusic.Metadata;
+import jmusic.playlist.Metadata;
 
 /**
  * Represents a row in the playlist model.
