@@ -17,6 +17,7 @@
 package jmusic.playlist.table;
 
 import java.io.File;
+import jmusic.jMusicController;
 import jmusic.playlist.Metadata;
 
 /**
@@ -49,6 +50,10 @@ public class Row {
 	public Row(File file){
 		this.file = file;
 		artist = file.getName();
+	}
+	
+	public void play(){
+		jMusicController.getMusicPlayer().play(file);
 	}
 	
 	public File getFile(){

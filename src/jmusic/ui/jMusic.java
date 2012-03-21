@@ -16,7 +16,6 @@
  */
 package jmusic.ui;
 
-import jmusic.ui.JTableAltRows;
 import img.LoadImage;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -34,6 +33,7 @@ import javax.swing.table.AbstractTableModel;
 import jmusic.jMusicController;
 import jmusic.playback.MusicPlayer;
 import jmusic.playlist.table.MusicTableModel;
+import jmusic.playlist.table.Row;
 import jmusic.util.FileCompareSize;
 import jmusic.util.FileFinder;
 import jmusic.util.ImageFileFilter;
@@ -91,11 +91,13 @@ public class jMusic extends javax.swing.JFrame {
 		timer = new Timer(100, new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (jMusicController.getMusicPlayer().isPlaying()){
-					int curTime = (int)(jMusicController.getMusicPlayer().getSongPosition() / 1000000);
-					int endTime = (int)(jMusicController.getMusicPlayer().getSongLength() / 1000000);
+				MusicPlayer mp = jMusicController.getMusicPlayer();
+				if (mp.isPlaying()){
+					int curTime = (int)(mp.getSongPosition() / 1000000);
+					int endTime = (int)(mp.getSongLength() / 1000000);
 					String strCurTime = (curTime / 60) + ":" + String.format("%02d",curTime % 60);
 					String strEndTime = (endTime / 60) + ":" + String.format("%02d",endTime % 60);
+					
 					jProgressBar1.setString(strCurTime + " / " + strEndTime);
 					jProgressBar1.setMaximum(endTime);
 					jProgressBar1.setValue(curTime);
@@ -334,9 +336,9 @@ public class jMusic extends javax.swing.JFrame {
 			selected = jTablePlaylist.getSelectedRow();
 		}
 		
-		File file = (File)((MusicTableModel)jTablePlaylist.getModel()).getRow(selected).getFile();
-		jMusicController.getMusicPlayer().play(file);
-		String path = file.getParent();
+		Row row = ((MusicTableModel)jTablePlaylist.getModel()).getRow(selected);
+		row.play();
+		String path = row.getFile().getParent();
 		
 		List<File> files = FileFinder.findAllFiles(new File(path),new FileCompareSize(),new ImageFileFilter());
 		for (File imageFile: files){

@@ -1,11 +1,15 @@
-jSocialPlayer
+jMusic
 --------------------------------------------------------------------------------
-jSocialPlayer is a Java based frontend which uses the GStreamer libraries for
+jMusic is a Java based music player which uses the GStreamer libraries for
 playback of media.
 
-This project aims to allow people at multiple locations play media in a
-syncronised fashion. Allowing for real time communication to occur between the
-participants.
+Currently the it is able to playback any music files supported by GStreamer and
+will load album art image files from the same location as the music.
+
+In the future i'm looking to add some form of realtime communication to the
+player and a way of syncronising playback of media between the linked players.
+This would allow people to watch/listen to media and talk about it in real time
+while experencing the same part of the media.
 
 --------------------------------------------------------------------------------
 Code in this project is licensed under the GNU GENERAL PUBLIC LICENSE

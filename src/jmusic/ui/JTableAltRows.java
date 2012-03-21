@@ -29,7 +29,7 @@ import javax.swing.table.TableCellRenderer;
  * the background. For tables with a background darker than 128 the alt is +10
  * off the background.
  * 
- * @author Chris Hallson
+ * @author DrLabman
  */
 public class JTableAltRows extends JTable {
 	private java.awt.Color altColour = java.awt.Color.WHITE;
