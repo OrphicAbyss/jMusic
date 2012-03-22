@@ -17,8 +17,17 @@
 package jmusic.playlist.table;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import jmusic.jMusicController;
 import jmusic.playlist.Metadata;
+import jmusic.ui.jMusic;
+import jmusic.util.FileCompareSize;
+import jmusic.util.FileFinder;
+import jmusic.util.ImageFileFilter;
 
 /**
  * Represents a row in the playlist model.
@@ -103,6 +112,26 @@ public class Row {
 	public String[] getMetadataArray(){
 		String[] data = new String[]{boldLabel("Artist", artist), boldLabel("Album",album), boldLabel("Title",title)};
 		return data;
+	}
+	
+	/**
+	 * Find the largest image file in the same or a sub-folder as the media file.
+	 * 
+	 * @return An image file or null if no files are found
+	 */
+	public File getImageFile(){
+		String path = file.getParent();
+		// Get all image files in the same folder (or sub-folder) as the media
+		List<File> files = FileFinder.findAllFiles(new File(path),new FileCompareSize(),new ImageFileFilter());
+		// DEBUG: Print image files found
+		for (File imageFile: files){
+			System.out.println("Image file: " + imageFile.getName());
+		}
+		// Find the largest image and use it (files are sorted by size)
+		if (files.size() > 0){
+			return files.get(files.size() - 1);
+		}
+		return null;
 	}
 	
 	public static int getColumnCount(){

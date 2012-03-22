@@ -29,13 +29,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
-import javax.swing.event.ListDataListener;
 import javax.swing.table.AbstractTableModel;
 import jmusic.jMusicController;
 import jmusic.playback.MusicPlayer;
 import jmusic.playlist.table.MusicTableModel;
 import jmusic.playlist.table.Row;
-import jmusic.playlist.table.Row.Column;
 import jmusic.util.FileCompareSize;
 import jmusic.util.FileFinder;
 import jmusic.util.ImageFileFilter;
@@ -159,35 +157,23 @@ public class jMusic extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jProgressBar1 = new javax.swing.JProgressBar();
         jToggleButtonBackward = new javax.swing.JToggleButton();
         jToggleButtonPlay = new javax.swing.JToggleButton();
         jToggleButtonStop = new javax.swing.JToggleButton();
         jToggleButtonForward = new javax.swing.JToggleButton();
+        jProgressBar1 = new javax.swing.JProgressBar();
         jButtonSettings = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        jScrollPanePlaylist = new javax.swing.JScrollPane();
         jTablePlaylist = new JTableAltRows();
         jPanelSidebar = new javax.swing.JPanel();
         jLabelAlbumArt = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        jScrollPaneMetadata = new javax.swing.JScrollPane();
         jListMediaMetadata = new javax.swing.JList();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("jMusic");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-
-        jProgressBar1.setMaximumSize(new java.awt.Dimension(32767, 48));
-        jProgressBar1.setMinimumSize(new java.awt.Dimension(10, 48));
-        jProgressBar1.setPreferredSize(new java.awt.Dimension(146, 48));
-        jProgressBar1.setString("");
-        jProgressBar1.setStringPainted(true);
-        jProgressBar1.setVerifyInputWhenFocusTarget(false);
-        jProgressBar1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jProgressBar1MouseClicked(evt);
-            }
-        });
 
         jToggleButtonBackward.setFocusable(false);
         jToggleButtonBackward.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -241,6 +227,18 @@ public class jMusic extends javax.swing.JFrame {
             }
         });
 
+        jProgressBar1.setMaximumSize(new java.awt.Dimension(32767, 48));
+        jProgressBar1.setMinimumSize(new java.awt.Dimension(10, 48));
+        jProgressBar1.setPreferredSize(new java.awt.Dimension(146, 48));
+        jProgressBar1.setString("");
+        jProgressBar1.setStringPainted(true);
+        jProgressBar1.setVerifyInputWhenFocusTarget(false);
+        jProgressBar1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jProgressBar1MouseClicked(evt);
+            }
+        });
+
         jButtonSettings.setName("Settings");
         jButtonSettings.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -264,9 +262,9 @@ public class jMusic extends javax.swing.JFrame {
                 jTableRowClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(jTablePlaylist);
+        jScrollPanePlaylist.setViewportView(jTablePlaylist);
 
-        jSplitPane1.setRightComponent(jScrollPane1);
+        jSplitPane1.setRightComponent(jScrollPanePlaylist);
 
         jLabelAlbumArt.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jLabelAlbumArt.setMaximumSize(new java.awt.Dimension(512, 512));
@@ -280,21 +278,21 @@ public class jMusic extends javax.swing.JFrame {
         });
 
         jListMediaMetadata.setName("");
-        jScrollPane2.setViewportView(jListMediaMetadata);
+        jScrollPaneMetadata.setViewportView(jListMediaMetadata);
 
         javax.swing.GroupLayout jPanelSidebarLayout = new javax.swing.GroupLayout(jPanelSidebar);
         jPanelSidebar.setLayout(jPanelSidebarLayout);
         jPanelSidebarLayout.setHorizontalGroup(
             jPanelSidebarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jLabelAlbumArt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(jScrollPaneMetadata, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         );
         jPanelSidebarLayout.setVerticalGroup(
             jPanelSidebarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelSidebarLayout.createSequentialGroup()
                 .addComponent(jLabelAlbumArt, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE))
+                .addComponent(jScrollPaneMetadata, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE))
         );
 
         jSplitPane1.setLeftComponent(jPanelSidebar);
@@ -353,31 +351,23 @@ public class jMusic extends javax.swing.JFrame {
 		}
 		
 		Row row = ((MusicTableModel)jTablePlaylist.getModel()).getRow(selected);
+		// Play music
 		row.play();
-		String path = row.getFile().getParent();
-		
-		jListMediaMetadata.setListData(row.getMetadataArray());
-		
-		// Get all image files in the same folder (or sub-folder) as the media
-		List<File> files = FileFinder.findAllFiles(new File(path),new FileCompareSize(),new ImageFileFilter());
-		for (File imageFile: files){
-			System.out.println("Image file: " + imageFile.getName());
-		}
-		// Find the largest image and use it
-		if (files.size() > 0){
-			File image = files.get(files.size() - 1);
+		// Get the album art image
+		File image = row.getImageFile();
+		if (image != null){
 			try {
 				ImageIcon album = new ImageIcon(image.toURI().toURL());
 				albumImage = album.getImage();
-
 			} catch (MalformedURLException ex) {
 				Logger.getLogger(jMusic.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		} else {
 			albumImage = null;
 		}
-		// Resize the image to fit the album art control
 		resizeImageToFit();
+		// Update the metadata under the image
+		jListMediaMetadata.setListData(row.getMetadataArray());
 	}
 	
 	/**
@@ -471,10 +461,17 @@ public class jMusic extends javax.swing.JFrame {
 	}//GEN-LAST:event_jProgressBar1MouseClicked
 
 	private void jLabelAlbumArtComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jLabelAlbumArtComponentResized
-		Rectangle rect = jLabelAlbumArt.getBounds();
-		rect.y = rect.y + rect.height - rect.width;
-		rect.height = rect.width;
-		jLabelAlbumArt.setBounds(rect);
+		Rectangle parentRect = jLabelAlbumArt.getParent().getBounds();
+		
+		Rectangle albumArtRect = jLabelAlbumArt.getBounds();
+		albumArtRect.height = albumArtRect.width;
+		jLabelAlbumArt.setBounds(albumArtRect);
+		
+		Rectangle metadataRect = jScrollPaneMetadata.getBounds();
+		metadataRect.y = albumArtRect.height + 6;
+		metadataRect.height = parentRect.height - albumArtRect.height - 6;
+		jScrollPaneMetadata.setBounds(metadataRect);
+		
 		resizeImageToFit();
 	}//GEN-LAST:event_jLabelAlbumArtComponentResized
 
@@ -484,8 +481,8 @@ public class jMusic extends javax.swing.JFrame {
     private javax.swing.JList jListMediaMetadata;
     private javax.swing.JPanel jPanelSidebar;
     private javax.swing.JProgressBar jProgressBar1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPaneMetadata;
+    private javax.swing.JScrollPane jScrollPanePlaylist;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTable jTablePlaylist;
     private javax.swing.JToggleButton jToggleButtonBackward;
