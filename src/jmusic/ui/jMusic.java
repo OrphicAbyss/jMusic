@@ -24,19 +24,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.util.List;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import jmusic.jMusicController;
 import jmusic.playback.MusicPlayer;
 import jmusic.playlist.table.MusicTableModel;
 import jmusic.playlist.table.Row;
-import jmusic.util.FileCompareSize;
-import jmusic.util.FileFinder;
-import jmusic.util.ImageFileFilter;
 
 /**
  * The main window of the music player
@@ -44,6 +41,8 @@ import jmusic.util.ImageFileFilter;
 public class jMusic extends javax.swing.JFrame {
 	// Timer for updating the progress bar
 	Timer timer = null;
+	boolean cleared = true;	/** Indicates that the previously playing media data has been cleared */
+	
 	// Icons used for buttons
 	ImageIcon imagePlay;
 	ImageIcon imagePause;
@@ -114,13 +113,21 @@ public class jMusic extends javax.swing.JFrame {
 					} else {
 						setPauseIcon();
 					}
+					
+					cleared = false;
 				} else {
-					jProgressBar1.setString("");
-					jProgressBar1.setMinimum(0);
-					jProgressBar1.setMaximum(0);
-					jProgressBar1.setValue(0);
-					jToggleButtonPlay.setSelected(false);
-					setPlayIcon();
+					if (!cleared){
+						jProgressBar1.setString("");
+						jProgressBar1.setMinimum(0);
+						jProgressBar1.setMaximum(0);
+						jProgressBar1.setValue(0);
+						jToggleButtonPlay.setSelected(false);
+						setPlayIcon();
+						setAlbumArt(null);
+						setMetadata(null);
+						
+						cleared = true;
+					}
 				}
 			}
 		});
@@ -341,7 +348,35 @@ public class jMusic extends javax.swing.JFrame {
 	public void updatePlaylistModel(AbstractTableModel playlistModel){
 		jTablePlaylist.setModel(playlistModel);
 	}
-		
+	
+	/**
+	 * Loads the given image file and returns it as an image object.
+	 * 
+	 * @param file The image file
+	 * @return The image object for the file to load, or null if there is a problem
+	 */
+	private Image getImage(File file){
+		// If the file object isn't null, try loading it
+		if (file != null){
+			try {
+				return ImageIO.read(file);
+			} catch (IOException ex) {
+				Logger.getLogger(jMusic.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Play the selected row in the playlist.
+	 * 
+	 * If no rows are selected then the first row is selected (if there are any
+	 * rows in the playlist).
+	 * 
+	 * 1. Tells the row to play.
+	 * 2. Loads the image for the row and displays it as the album art.
+	 * 3. Load the metadata into the details pane.
+	 */
 	private void playFile(){
 		jToggleButtonPlay.setSelected(true);
 		int selected = jTablePlaylist.getSelectedRow();
@@ -353,21 +388,33 @@ public class jMusic extends javax.swing.JFrame {
 		Row row = ((MusicTableModel)jTablePlaylist.getModel()).getRow(selected);
 		// Play music
 		row.play();
-		// Get the album art image
-		File image = row.getImageFile();
-		if (image != null){
-			try {
-				ImageIcon album = new ImageIcon(image.toURI().toURL());
-				albumImage = album.getImage();
-			} catch (MalformedURLException ex) {
-				Logger.getLogger(jMusic.class.getName()).log(Level.SEVERE, null, ex);
-			}
+		setAlbumArt(row.getImageFile());
+		setMetadata(row.getMetadataArray());
+	}
+	
+	/**
+	 * Set the metadata list to the supplied string array.
+	 * 
+	 * @param data A string array of metadata details
+	 */
+	private void setMetadata(String[] data){
+		if (data == null){
+			// Clear the data
+			jListMediaMetadata.setListData(new String[]{});
 		} else {
-			albumImage = null;
+			// Used the the supplied data
+			jListMediaMetadata.setListData(data);
 		}
+	}
+	
+	/**
+	 * Set the album art to the passed in file, or clear the image if empty.
+	 * 
+	 * @param image The image to load or null to clear the album art component
+	 */
+	private void setAlbumArt(File image){
+		albumImage = getImage(image);
 		resizeImageToFit();
-		// Update the metadata under the image
-		jListMediaMetadata.setListData(row.getMetadataArray());
 	}
 	
 	/**
