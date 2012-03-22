@@ -82,6 +82,28 @@ public class Row {
 				return "Bad column number";
 		}
 	}
+
+	/**
+	 * Creates a 'html' markup string to have bold labels and normal values for
+	 * UI components.
+	 * 
+	 * @param label The label text
+	 * @param value The value text
+	 * @return A string with html markup to bold the label
+	 */
+	private String boldLabel(String label, String value){
+		return "<html><b>" + label + ":</b> " + value + "</html>";
+	}
+	
+	/**
+	 * Gets an array of strings listing metadata values.
+	 * 
+	 * @return string array containing readable metadata
+	 */
+	public String[] getMetadataArray(){
+		String[] data = new String[]{boldLabel("Artist", artist), boldLabel("Album",album), boldLabel("Title",title)};
+		return data;
+	}
 	
 	public static int getColumnCount(){
 		return 4;

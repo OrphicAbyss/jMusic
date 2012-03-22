@@ -29,11 +29,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.event.ListDataListener;
 import javax.swing.table.AbstractTableModel;
 import jmusic.jMusicController;
 import jmusic.playback.MusicPlayer;
 import jmusic.playlist.table.MusicTableModel;
 import jmusic.playlist.table.Row;
+import jmusic.playlist.table.Row.Column;
 import jmusic.util.FileCompareSize;
 import jmusic.util.FileFinder;
 import jmusic.util.ImageFileFilter;
@@ -42,15 +44,17 @@ import jmusic.util.ImageFileFilter;
  * The main window of the music player
  */
 public class jMusic extends javax.swing.JFrame {
+	// Timer for updating the progress bar
 	Timer timer = null;
-	
-	ImageIcon play;
-	ImageIcon pause;
-	ImageIcon stop;
-	ImageIcon forward;
-	ImageIcon backward;
-	ImageIcon settings;
-	
+	// Icons used for buttons
+	ImageIcon imagePlay;
+	ImageIcon imagePause;
+	ImageIcon imageStop;
+	ImageIcon imageForward;
+	ImageIcon imageBackward;
+	ImageIcon imageSettings;
+	ImageIcon imageIcon;
+	// Current album art image
 	Image albumImage;
 	
 	/**
@@ -59,25 +63,29 @@ public class jMusic extends javax.swing.JFrame {
 	public jMusic() {
 		initComponents();
 		
-		play = LoadImage.load("start.png");
-		pause = LoadImage.load("pause.png");
-		stop = LoadImage.load("stop.png");
-		backward = LoadImage.load("backward.png");
-		forward = LoadImage.load("forward.png");
-		settings = LoadImage.load("settings.png");
+		imagePlay = LoadImage.load("start.png");
+		imagePause = LoadImage.load("pause.png");
+		imageStop = LoadImage.load("stop.png");
+		imageBackward = LoadImage.load("backward.png");
+		imageForward = LoadImage.load("forward.png");
+		imageSettings = LoadImage.load("settings.png");
+		imageIcon = LoadImage.load("icon.png");
 		
 		albumImage = null;
 		
-		jToggleButtonPlay.setIcon(play);
-		jToggleButtonStop.setIcon(stop);
-		jToggleButtonBackward.setIcon(backward);
-		jToggleButtonForward.setIcon(forward);
-		jButtonSettings.setIcon(settings);
-		
+		// Set icon for the frame
+		this.setIconImage(imageIcon.getImage());
+		// Set the button icons
+		jToggleButtonPlay.setIcon(imagePlay);
+		jToggleButtonStop.setIcon(imageStop);
+		jToggleButtonBackward.setIcon(imageBackward);
+		jToggleButtonForward.setIcon(imageForward);
+		jButtonSettings.setIcon(imageSettings);
+		// Only allow one row to be selected in the playlist
 		jTablePlaylist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
+		// Load the media folder name out of settings
 		final String folder = jMusicController.getDataStorage().get("MusicFolder");
-		
+		// If we have a folder then create a playlist
 		if (folder != null){
 			SwingUtilities.invokeLater(new Runnable(){
 				@Override
@@ -87,7 +95,7 @@ public class jMusic extends javax.swing.JFrame {
 				}
 			});
 		}
-		
+		// Timer to update progress bars and button icons
 		timer = new Timer(100, new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -122,23 +130,23 @@ public class jMusic extends javax.swing.JFrame {
 	}
 
 	private void setPlayIcon(){
-		jToggleButtonPlay.setIcon(play);
-		jToggleButtonPlay.setRolloverIcon(play);
-		jToggleButtonPlay.setRolloverSelectedIcon(play);
+		jToggleButtonPlay.setIcon(imagePlay);
+		jToggleButtonPlay.setRolloverIcon(imagePlay);
+		jToggleButtonPlay.setRolloverSelectedIcon(imagePlay);
 		jToggleButtonPlay.setSelected(false);
 	}
 	
 	private void setPlayingIcon(){
-		jToggleButtonPlay.setIcon(play);
-		jToggleButtonPlay.setRolloverIcon(pause);
-		jToggleButtonPlay.setRolloverSelectedIcon(pause);
+		jToggleButtonPlay.setIcon(imagePlay);
+		jToggleButtonPlay.setRolloverIcon(imagePause);
+		jToggleButtonPlay.setRolloverSelectedIcon(imagePause);
 		jToggleButtonPlay.setSelected(true);
 	}
 	
 	private void setPauseIcon(){
-		jToggleButtonPlay.setIcon(pause);
-		jToggleButtonPlay.setRolloverIcon(play);
-		jToggleButtonPlay.setRolloverSelectedIcon(play);
+		jToggleButtonPlay.setIcon(imagePause);
+		jToggleButtonPlay.setRolloverIcon(imagePlay);
+		jToggleButtonPlay.setRolloverSelectedIcon(imagePlay);
 		jToggleButtonPlay.setSelected(true);
 	}
 	
@@ -162,9 +170,12 @@ public class jMusic extends javax.swing.JFrame {
         jTablePlaylist = new JTableAltRows();
         jPanelSidebar = new javax.swing.JPanel();
         jLabelAlbumArt = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jListMediaMetadata = new javax.swing.JList();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("jMusic");
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         jProgressBar1.setMaximumSize(new java.awt.Dimension(32767, 48));
         jProgressBar1.setMinimumSize(new java.awt.Dimension(10, 48));
@@ -268,17 +279,22 @@ public class jMusic extends javax.swing.JFrame {
             }
         });
 
+        jListMediaMetadata.setName("");
+        jScrollPane2.setViewportView(jListMediaMetadata);
+
         javax.swing.GroupLayout jPanelSidebarLayout = new javax.swing.GroupLayout(jPanelSidebar);
         jPanelSidebar.setLayout(jPanelSidebarLayout);
         jPanelSidebarLayout.setHorizontalGroup(
             jPanelSidebarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jLabelAlbumArt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         );
         jPanelSidebarLayout.setVerticalGroup(
             jPanelSidebarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSidebarLayout.createSequentialGroup()
-                .addGap(0, 248, Short.MAX_VALUE)
-                .addComponent(jLabelAlbumArt, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanelSidebarLayout.createSequentialGroup()
+                .addComponent(jLabelAlbumArt, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE))
         );
 
         jSplitPane1.setLeftComponent(jPanelSidebar);
@@ -340,13 +356,15 @@ public class jMusic extends javax.swing.JFrame {
 		row.play();
 		String path = row.getFile().getParent();
 		
+		jListMediaMetadata.setListData(row.getMetadataArray());
+		
+		// Get all image files in the same folder (or sub-folder) as the media
 		List<File> files = FileFinder.findAllFiles(new File(path),new FileCompareSize(),new ImageFileFilter());
 		for (File imageFile: files){
 			System.out.println("Image file: " + imageFile.getName());
-			
 		}
+		// Find the largest image and use it
 		if (files.size() > 0){
-			// grab the last file
 			File image = files.get(files.size() - 1);
 			try {
 				ImageIcon album = new ImageIcon(image.toURI().toURL());
@@ -358,9 +376,13 @@ public class jMusic extends javax.swing.JFrame {
 		} else {
 			albumImage = null;
 		}
+		// Resize the image to fit the album art control
 		resizeImageToFit();
 	}
 	
+	/**
+	 * Resize the current album art image to fit the album art control
+	 */
 	private void resizeImageToFit(){
 		ImageIcon album = null;
 		
@@ -433,7 +455,6 @@ public class jMusic extends javax.swing.JFrame {
 				break;
 			case "Settings":
 				Settings settings = new Settings();
-				
 				settings.setVisible(true);
 				break;
 			default:
@@ -460,9 +481,11 @@ public class jMusic extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonSettings;
     private javax.swing.JLabel jLabelAlbumArt;
+    private javax.swing.JList jListMediaMetadata;
     private javax.swing.JPanel jPanelSidebar;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTable jTablePlaylist;
     private javax.swing.JToggleButton jToggleButtonBackward;
