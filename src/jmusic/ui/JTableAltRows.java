@@ -22,8 +22,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- * Modifies the JTable object to have alternating row colours which are slightly
- * different.
+ * Modifies the JTable object to have alternating row colours which are offset.
  * 
  * For tables with a background which is brighter than 128 the alt is -10 off
  * the background. For tables with a background darker than 128 the alt is +10
@@ -39,18 +38,23 @@ public class JTableAltRows extends JTable {
 		setAltColour(getBackground());
 	}
 	
+	/**
+	 * Work out an offset colour based on the given colour.
+	 * 
+	 * @param colour The colour to offset from.
+	 */
+	private void setAltColour(Color colour){
+		int r = colour.getRed() > 128 ? colour.getRed() - 10 : colour.getRed() + 10;
+		int g = colour.getGreen() > 128 ? colour.getGreen() - 10 : colour.getGreen() + 10;
+		int b = colour.getBlue() > 128 ? colour.getBlue() - 10 : colour.getBlue() + 10;
+		
+		altColour = new java.awt.Color(r,b,g);		
+	}
+	
 	@Override
 	public void setBackground(Color bg){
 		super.setBackground(bg);
 		setAltColour(bg);
-	}
-	
-	private void setAltColour(Color bg){
-		int r = bg.getRed() > 128 ? bg.getRed() - 10 : bg.getRed() + 10;
-		int g = bg.getGreen() > 128 ? bg.getGreen() - 10 : bg.getGreen() + 10;
-		int b = bg.getBlue() > 128 ? bg.getBlue() - 10 : bg.getBlue() + 10;
-		
-		altColour = new java.awt.Color(r,b,g);		
 	}
 	
 	@Override

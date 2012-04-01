@@ -18,6 +18,7 @@ package jmusic.playback;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
+import jmusic.jMusicController;
 import org.gstreamer.*;
 import org.gstreamer.elements.PlayBin2;
 
@@ -33,19 +34,12 @@ public class MusicPlayerGStreamer implements MusicPlayer {
 	public MusicPlayerGStreamer(){
 		playbin = new PlayBin2("AudioPlayer");
 		playbin.setVideoSink(ElementFactory.make("fakesink", "videosink"));
-		playbin.getBus().connect(new Bus.TAG() {
-			@Override
-			public void tagsFound(GstObject go, TagList tl) {
-//				for (String tagName : tl.getTagNames()) {
-//					System.out.println("Tag: " + tagName);
-//				}
-			}
-		});
 		playbin.getBus().connect(new Bus.EOS() {
 			@Override
 			public void endOfStream(GstObject go) {
 				System.out.println("Stream finsihed!");
 				stop();
+				jMusicController.getGUI().mediaFinished();
 			}
 		});
 		playbin.getBus().connect(new Bus.BUFFERING() {
@@ -122,7 +116,12 @@ public class MusicPlayerGStreamer implements MusicPlayer {
 	}
 	
 	@Override
-	public void play(File musicFile) {       
+	public void play(File musicFile) {
+		if (isPlaying())
+			stop();
+		
+		jMusicController.getGUI().setNewMedia();
+		
         playbin.setInputFile(musicFile);
 		playbin.play();
 	}

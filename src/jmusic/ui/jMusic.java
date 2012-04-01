@@ -32,16 +32,15 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import jmusic.jMusicController;
 import jmusic.playback.MusicPlayer;
-import jmusic.playlist.table.MusicTableModel;
 import jmusic.playlist.table.Row;
 
 /**
  * The main window of the music player
  */
 public class jMusic extends javax.swing.JFrame {
-	// Timer for updating the progress bar
-	Timer timer = null;
+	Timer timer = null;		/** Timer object that updates the progress bar, button states and metadata display */
 	boolean cleared = true;	/** Indicates that the previously playing media data has been cleared */
+	boolean loaded = false; /** Indicates that metadata has been loaded for the playing media file */
 	
 	// Icons used for buttons
 	ImageIcon imagePlay;
@@ -77,7 +76,7 @@ public class jMusic extends javax.swing.JFrame {
 		jToggleButtonStop.setIcon(imageStop);
 		jToggleButtonBackward.setIcon(imageBackward);
 		jToggleButtonForward.setIcon(imageForward);
-		jButtonSettings.setIcon(imageSettings);
+		jToggleButtonSettings.setIcon(imageSettings);
 		// Only allow one row to be selected in the playlist
 		jTablePlaylist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		// Load the media folder name out of settings
@@ -114,6 +113,11 @@ public class jMusic extends javax.swing.JFrame {
 						setPauseIcon();
 					}
 					
+					if (!loaded){
+						updateMetadata();
+						loaded = true;
+					}
+					
 					cleared = false;
 				} else {
 					if (!cleared){
@@ -121,11 +125,13 @@ public class jMusic extends javax.swing.JFrame {
 						jProgressBar1.setMinimum(0);
 						jProgressBar1.setMaximum(0);
 						jProgressBar1.setValue(0);
+						
 						jToggleButtonPlay.setSelected(false);
 						setPlayIcon();
-						setAlbumArt(null);
-						setMetadata(null);
 						
+						clearMetadata();
+						
+						loaded = false;
 						cleared = true;
 					}
 				}
@@ -134,6 +140,9 @@ public class jMusic extends javax.swing.JFrame {
 		timer.start();
 	}
 
+	/**
+	 * Setup play button to default state
+	 */
 	private void setPlayIcon(){
 		jToggleButtonPlay.setIcon(imagePlay);
 		jToggleButtonPlay.setRolloverIcon(imagePlay);
@@ -141,6 +150,9 @@ public class jMusic extends javax.swing.JFrame {
 		jToggleButtonPlay.setSelected(false);
 	}
 	
+	/**
+	 * Setup play button to playing state
+	 */
 	private void setPlayingIcon(){
 		jToggleButtonPlay.setIcon(imagePlay);
 		jToggleButtonPlay.setRolloverIcon(imagePause);
@@ -148,11 +160,29 @@ public class jMusic extends javax.swing.JFrame {
 		jToggleButtonPlay.setSelected(true);
 	}
 	
+	/**
+	 * Setup play button to paused state
+	 */
 	private void setPauseIcon(){
 		jToggleButtonPlay.setIcon(imagePause);
 		jToggleButtonPlay.setRolloverIcon(imagePlay);
 		jToggleButtonPlay.setRolloverSelectedIcon(imagePlay);
 		jToggleButtonPlay.setSelected(true);
+	}
+	
+	/**
+	 * When called we will reload the metadata/album art on the next GUI update.
+	 */
+	public void setNewMedia() {
+		loaded = false;
+	}
+	
+	/**
+	 * Event fired when the media playing finishes so we can start the next
+	 * track.
+	 */
+	public void mediaFinished(){
+		((JTablePlaylist)jTablePlaylist).forward();
 	}
 	
 	/**
@@ -169,14 +199,14 @@ public class jMusic extends javax.swing.JFrame {
         jToggleButtonStop = new javax.swing.JToggleButton();
         jToggleButtonForward = new javax.swing.JToggleButton();
         jProgressBar1 = new javax.swing.JProgressBar();
-        jButtonSettings = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPanePlaylist = new javax.swing.JScrollPane();
-        jTablePlaylist = new JTableAltRows();
+        jTablePlaylist = new JTablePlaylist();
         jPanelSidebar = new javax.swing.JPanel();
         jLabelAlbumArt = new javax.swing.JLabel();
         jScrollPaneMetadata = new javax.swing.JScrollPane();
         jListMediaMetadata = new javax.swing.JList();
+        jToggleButtonSettings = new javax.swing.JToggleButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("jMusic");
@@ -246,13 +276,6 @@ public class jMusic extends javax.swing.JFrame {
             }
         });
 
-        jButtonSettings.setName("Settings");
-        jButtonSettings.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                toggleButtonPress(evt);
-            }
-        });
-
         jSplitPane1.setDividerLocation(256);
 
         jTablePlaylist.setModel(new javax.swing.table.DefaultTableModel(
@@ -264,11 +287,6 @@ public class jMusic extends javax.swing.JFrame {
             }
         ));
         jTablePlaylist.setGridColor(jTablePlaylist.getBackground());
-        jTablePlaylist.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTableRowClicked(evt);
-            }
-        });
         jScrollPanePlaylist.setViewportView(jTablePlaylist);
 
         jSplitPane1.setRightComponent(jScrollPanePlaylist);
@@ -304,6 +322,19 @@ public class jMusic extends javax.swing.JFrame {
 
         jSplitPane1.setLeftComponent(jPanelSidebar);
 
+        jToggleButtonSettings.setFocusable(false);
+        jToggleButtonSettings.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jToggleButtonSettings.setMaximumSize(new java.awt.Dimension(52, 52));
+        jToggleButtonSettings.setMinimumSize(new java.awt.Dimension(48, 48));
+        jToggleButtonSettings.setName("Settings");
+        jToggleButtonSettings.setPreferredSize(new java.awt.Dimension(52, 52));
+        jToggleButtonSettings.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToggleButtonSettings.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toggleButtonPress(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -319,7 +350,7 @@ public class jMusic extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButtonSettings, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jToggleButtonSettings, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 806, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
@@ -331,7 +362,7 @@ public class jMusic extends javax.swing.JFrame {
                     .addComponent(jToggleButtonPlay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jToggleButtonStop, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jToggleButtonForward, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButtonSettings, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jToggleButtonSettings, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSplitPane1))
         );
@@ -368,28 +399,20 @@ public class jMusic extends javax.swing.JFrame {
 	}
 	
 	/**
-	 * Play the selected row in the playlist.
-	 * 
-	 * If no rows are selected then the first row is selected (if there are any
-	 * rows in the playlist).
-	 * 
-	 * 1. Tells the row to play.
-	 * 2. Loads the image for the row and displays it as the album art.
-	 * 3. Load the metadata into the details pane.
+	 * Update the metadata and album art based on the currently playing media
 	 */
-	private void playFile(){
-		jToggleButtonPlay.setSelected(true);
+	private void updateMetadata(){
 		int selected = jTablePlaylist.getSelectedRow();
-		if (selected == -1){
-			jTablePlaylist.addRowSelectionInterval(0, 0);
-			selected = jTablePlaylist.getSelectedRow();
-		}
-		
-		Row row = ((MusicTableModel)jTablePlaylist.getModel()).getRow(selected);
-		// Play music
-		row.play();
+		Row row = ((JTablePlaylist)jTablePlaylist).getModel().getRow(selected);
 		setAlbumArt(row.getImageFile());
 		setMetadata(row.getMetadataArray());
+		this.setTitle("jMusic " + row.getMetadataString());
+	}
+	
+	private void clearMetadata(){
+		setAlbumArt(null);
+		setMetadata(null);
+		setTitle("jMusic");
 	}
 	
 	/**
@@ -433,66 +456,40 @@ public class jMusic extends javax.swing.JFrame {
 		jLabelAlbumArt.setIcon(album);
 	}
 	
-	private void jTableRowClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableRowClicked
-		if (evt.getClickCount() == 2){
-			jMusicController.getMusicPlayer().stop();
-			jToggleButtonPlay.setSelected(true);
-			jToggleButtonStop.setSelected(false);
-			
-			//double click
-			playFile();
-		}
-	}//GEN-LAST:event_jTableRowClicked
-
 	private void toggleButtonPress(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toggleButtonPress
-		String buttonName = ((AbstractButton)evt.getSource()).getName();
-		int currentRow = jTablePlaylist.getSelectedRow();
+		AbstractButton button = (AbstractButton)evt.getSource();
+		String buttonName = button.getName();
+		
 		switch (buttonName) {
 			case "Play":
 				MusicPlayer mp = jMusicController.getMusicPlayer();
 				if (!mp.isPlaying()){
 					// If we arn't playing, then play a file
-					playFile();
-					jToggleButtonPlay.setSelected(true);
-					setPlayingIcon();
+					((JTablePlaylist)jTablePlaylist).play();
 				} else if (mp.isPaused()){
 					// If we are paused, then resume
 					jMusicController.getMusicPlayer().resume();
-					jToggleButtonPlay.setSelected(true);
-					setPlayingIcon();
 				} else {
 					// If we aren't paused, then pause
 					jMusicController.getMusicPlayer().pause();
-					jToggleButtonPlay.setSelected(true);
-					setPauseIcon();
 				}
 				break;
 			case "Stop":
 				jMusicController.getMusicPlayer().stop();
-				jToggleButtonPlay.setSelected(false);
-				jToggleButtonStop.setSelected(false);
+				button.setSelected(false);
 				break;
 			case "Forward":
-				jMusicController.getMusicPlayer().stop();
-				currentRow++;
-				if (currentRow >= jTablePlaylist.getRowCount())
-					currentRow = 0;
-				jTablePlaylist.setRowSelectionInterval(currentRow, currentRow);
-				jToggleButtonForward.setSelected(false);
-				playFile();
+				((JTablePlaylist)jTablePlaylist).forward();
+				button.setSelected(false);
 				break;
 			case "Backward":
-				jMusicController.getMusicPlayer().stop();
-				currentRow--;
-				if (currentRow <= 0)
-					currentRow = jTablePlaylist.getRowCount() - 1;
-				jTablePlaylist.setRowSelectionInterval(currentRow, currentRow);
-				jToggleButtonBackward.setSelected(false);
-				playFile();
+				((JTablePlaylist)jTablePlaylist).backward();
+				button.setSelected(false);
 				break;
 			case "Settings":
 				Settings settings = new Settings();
 				settings.setVisible(true);
+				button.setSelected(false);
 				break;
 			default:
 				System.out.println("Unknown button: " + buttonName);
@@ -523,7 +520,6 @@ public class jMusic extends javax.swing.JFrame {
 	}//GEN-LAST:event_jLabelAlbumArtComponentResized
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonSettings;
     private javax.swing.JLabel jLabelAlbumArt;
     private javax.swing.JList jListMediaMetadata;
     private javax.swing.JPanel jPanelSidebar;
@@ -535,7 +531,7 @@ public class jMusic extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleButtonBackward;
     private javax.swing.JToggleButton jToggleButtonForward;
     private javax.swing.JToggleButton jToggleButtonPlay;
+    private javax.swing.JToggleButton jToggleButtonSettings;
     private javax.swing.JToggleButton jToggleButtonStop;
     // End of variables declaration//GEN-END:variables
-
 }

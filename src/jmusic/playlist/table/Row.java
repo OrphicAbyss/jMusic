@@ -17,14 +17,10 @@
 package jmusic.playlist.table;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.ImageIcon;
 import jmusic.jMusicController;
 import jmusic.playlist.Metadata;
-import jmusic.ui.jMusic;
 import jmusic.util.FileCompareSize;
 import jmusic.util.FileFinder;
 import jmusic.util.ImageFileFilter;
@@ -114,6 +110,10 @@ public class Row {
 		return data;
 	}
 	
+	public String getMetadataString(){
+		return "[" + artist + " - " + album + " - " + title + "]";
+	}
+	
 	/**
 	 * Find the largest image file in the same or a sub-folder as the media file.
 	 * 
@@ -134,14 +134,30 @@ public class Row {
 		return null;
 	}
 	
+	/**
+	 * Get the number of columns
+	 * 
+	 * @return number of columns
+	 */
 	public static int getColumnCount(){
 		return 4;
 	}
 	
+	/**
+	 * The column name for the given column index
+	 * 
+	 * @param column the column index
+	 * @return the column name
+	 */
 	public static String getColumnName(int column){
 		return Column.values()[column].getTitle();
 	}
 	
+	/**
+	 * Get an array of column names in index order
+	 * 
+	 * @return A string array of column names in index order
+	 */
 	public static String[] getColumnNames(){
 		Column[] columns = Column.values();
 		String[] columnNames = new String[columns.length];
@@ -149,5 +165,19 @@ public class Row {
 			columnNames[i] = columns[i].getTitle();
 		}
 		return columnNames;
+	}
+	
+	/**
+	 * Converts an ArrayList of files to an array of Rows
+	 * 
+	 * @param files A list of File objects
+	 * @return A list of of Row objects
+	 */
+	public static List<Row> convertFileArrayToRowArray(List<File> files){
+		ArrayList<Row> rows = new ArrayList<Row>(files.size());
+		for (File file: files){
+			rows.add(new Row(file));
+		}
+		return rows;
 	}
 }

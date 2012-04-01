@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.table.AbstractTableModel;
 import jmusic.config.DataStorage;
 import jmusic.jMusicController;
 import jmusic.playlist.table.MusicTableModel;
@@ -33,8 +34,9 @@ import jmusic.util.MusicFileFilter;
  * 
  * @author DrLabman
  */
-public class Playlist {
-	MusicTableModel model = null;
+public class Playlist extends AbstractTableModel {
+	private ArrayList<Row> dataRows = new ArrayList<Row>();
+	private MusicTableModel model = null;
 	
 	private Playlist() {
 		model = new MusicTableModel();
@@ -47,7 +49,60 @@ public class Playlist {
 	private static class PlaylistHolder {
 		private static final Playlist INSTANCE = new Playlist();
 	}
+	
+	@Override
+	public int getRowCount() {
+		return dataRows.size();
+	}
+
+	@Override
+	public int getColumnCount() {
+		return Row.getColumnCount();
+	}
+
+	@Override
+	public String getColumnName(int column) {
+		return Row.getColumnName(column);
+	}
+	
+	@Override
+	public Object getValueAt(int rowIndex, int columnIndex) {
+		return dataRows.get(rowIndex).get(columnIndex);
+	}
+	
+	/**
+	 * Get the specified row from the playlist
+	 * 
+	 * @param index the row wanted
+	 * @return the row object
+	 */
+	public Row getRow(int index){
+		return dataRows.get(index);
+	}
 		
+	/**
+	 * @return the columnNames
+	 */
+	public String[] getColumnNames() {
+		return Row.getColumnNames();
+	}
+	
+	/**
+	 * Removes all rows of the playlist
+	 */
+	public void clear(){
+		dataRows.clear();
+		fireTableDataChanged();
+	}
+
+	/**
+	 * Get the playlist table model
+	 * @return 
+	 */
+	public AbstractTableModel getModel(){
+		return this;
+	}
+	
 	/**
 	 * Finds all files (recursive) under the given directory which are music
 	 * files and creates a list of them.
@@ -63,31 +118,55 @@ public class Playlist {
 			return;
 		}
 		// Update the settings file
-		saveNewMusicFolder(dir);
+		savePlaylistData(dir);
 		// Get the full list of files
 		List<File> files = FileFinder.findAllFiles(dir,new FileCompareName(),new MusicFileFilter());
 		// Conver to a list of rows
 		List<Row> rows = convertFileArrayToRowArray(files);
 		// Fill playlist with filenames
-		model.addRows(rows);
+		dataRows.addAll(rows);
 		// Fire that we have set new data in the model
-		model.fireTableDataChanged();
+		fireTableDataChanged();
 		// Load actual metadata in background
-		model.loadMetadata();
+		loadMetadata();
 	}
 	
 	/**
-	 * Get the playlist table model
-	 * @return 
+	 * Load the metadata for all the files in our list
 	 */
-	public MusicTableModel getModel(){
-		return model;
+	public void loadMetadata(){
+		Thread loader = new Thread(new Runnable(){
+			static final int updateVal = 19;
+			
+			@Override
+			public void run() {
+				MetadataLoader loader = MetadataLoader.getInstance();
+
+				int lastFired = 0;
+				for (int i=0; i<dataRows.size(); i++){
+					Row row = dataRows.get(i);
+					Metadata md = loader.loadMetadata(row.getFile());
+					row.setData(md);
+					if (i % (updateVal + 1) == updateVal){
+						//System.out.println("Firing update");
+						fireTableRowsUpdated(i - updateVal, i);
+						lastFired = i;
+					}
+				}
+				// Update for the last lot since we last fired an update of the table model
+				if (lastFired < dataRows.size()){
+					fireTableRowsUpdated(lastFired+1,dataRows.size()-1);
+				}
+				//System.out.println("Updated!!");
+			}
+		});
+		loader.start();
 	}
 	
 	/**
 	 * Save the new music folder to our settings file
 	 */
-	private void saveNewMusicFolder(File dir){
+	private void savePlaylistData(File dir){
 		// Save this folder as the new music folder
 		DataStorage ds = jMusicController.getDataStorage();
 		ds.set("MusicFolder", dir.getPath());
