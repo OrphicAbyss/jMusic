@@ -16,13 +16,26 @@
  */
 package jmusic;
 
+import java.awt.BorderLayout;
+import java.awt.Desktop;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import jmusic.ui.jMusic;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import jmusic.config.DataStorage;
 import jmusic.config.DataStorageProperties;
 import jmusic.playback.MusicPlayer;
 import jmusic.playback.MusicPlayerGStreamer;
 import jmusic.playlist.Playlist;
+import jmusic.ui.JDialogAdvanced;
 import org.gstreamer.Gst;
 
 /**
@@ -31,8 +44,8 @@ import org.gstreamer.Gst;
  * @author DrLabman
  */
 public class jMusicController {
-	static final boolean DEBUG = false;
-	static final String PLAYER_NAME = "jMusic";
+	public static final boolean DEBUG = false;
+	public static final String PLAYER_NAME = "jMusic";
 	
 	static MusicPlayer musicPlayer = null;
 	static Playlist playlist = null;
@@ -93,16 +106,11 @@ public class jMusicController {
 			String arch = System.getProperty("os.arch");
 
 			if (os.startsWith("Windows") && arch.equals("amd64")){
-				JOptionPane.showMessageDialog(null, "Unabel to find the GStreamer "
-						+ "libraries.\n\nBecause only 32bit builds of GStreamer "
-						+ "are provided for windows it is\nrequired that a 32bit "
-						+ "Java Virtual Machine is used to run " + PLAYER_NAME 
-						+ ".");
+				JDialogAdvanced.showWindowsJava64bitError();
+			} else if (os.startsWith("Windows")){
+				JDialogAdvanced.showWindowsJava32bitError();
 			} else {
-				JOptionPane.showMessageDialog(null, "Unable to find the GStreamer "
-						+ "libraries.\n\nCheck that GStreamer is installed and match "
-						+ "the\narchitecture (32bit or 64bit) of the Java Virtual "
-						+ "Machine.");	
+				JDialogAdvanced.showOtherPlatformError();
 			}
 			
 			//Exit with error
