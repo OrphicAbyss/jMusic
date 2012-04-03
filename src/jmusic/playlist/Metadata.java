@@ -16,6 +16,7 @@
  */
 package jmusic.playlist;
 
+import java.util.HashMap;
 import java.util.List;
 import org.gstreamer.TagList;
 
@@ -26,6 +27,49 @@ import org.gstreamer.TagList;
  * @author DrLabman
  */
 public class Metadata {
+	enum MetadataType {
+		TITLE("title"),
+		ARTIST("artist"),
+		ALBUM("album"),
+		TRACK_NUMBER("track-number");
+		
+		
+		String value;
+		MetadataType(String value){
+			this.value = value;
+		}
+		
+		String getValue(){
+			return value;
+		}
+		
+		static final HashMap<String,MetadataType> lookup = new HashMap<String,MetadataType>();
+		static {
+			MetadataType values[] = MetadataType.values();
+			
+			for (MetadataType value: values){
+				lookup.put(value.getValue(), value);
+			}
+		}
+		
+		/**
+		 * Given a string value we find a matching Enum value.
+		 * 
+		 * @param value The string value of the Enum we want
+		 * @return MetadataType enum object
+		 */
+		static MetadataType parse(String value){
+			//return lookup.get(value);
+			
+			MetadataType types[] = MetadataType.values();
+			for (MetadataType type: types){
+				if (type.getValue().equals(value))
+					return type;
+			}
+			return null;
+		}
+	}
+	
 	private String title;
 	private String artist;
 	private String album;
@@ -68,25 +112,28 @@ public class Metadata {
 	 */
 	private void parse(TagList tags){
 		parsed = true;
-				
+		
 		for (String tagName : tags.getTagNames()) {
-			switch (tagName) {
-				case "title":
-					title = data(tags.getValues(tagName));
-					hasData = true;
-					break;
-				case "artist":
-					artist = data(tags.getValues(tagName));
-					hasData = true;
-					break;
-				case "album":
-					album = data(tags.getValues(tagName));
-					hasData = true;
-					break;
-				case "track-number":
-					trackNumber = data(tags.getValues(tagName));
-					hasData = true;
-					break;
+			MetadataType type = MetadataType.parse(tagName);
+			if (type != null){
+				switch (type) {
+					case TITLE:
+						title = data(tags.getValues(tagName));
+						hasData = true;
+						break;
+					case ARTIST:
+						artist = data(tags.getValues(tagName));
+						hasData = true;
+						break;
+					case ALBUM:
+						album = data(tags.getValues(tagName));
+						hasData = true;
+						break;
+					case TRACK_NUMBER:
+						trackNumber = data(tags.getValues(tagName));
+						hasData = true;
+						break;
+				}
 			}
 		}
 	}

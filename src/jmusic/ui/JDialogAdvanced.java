@@ -52,7 +52,9 @@ public class JDialogAdvanced {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					Desktop.getDesktop().browse(new URI(linkValue));
-				} catch (URISyntaxException | IOException ex) {
+				} catch (URISyntaxException ex){
+					Logger.getLogger(jMusicController.class.getName()).log(Level.SEVERE, null, ex);
+				} catch (IOException ex) {
 					Logger.getLogger(jMusicController.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}

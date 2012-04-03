@@ -16,26 +16,13 @@
  */
 package jmusic;
 
-import java.awt.BorderLayout;
-import java.awt.Desktop;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import jmusic.ui.jMusic;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import jmusic.config.DataStorage;
 import jmusic.config.DataStorageProperties;
 import jmusic.playback.MusicPlayer;
 import jmusic.playback.MusicPlayerGStreamer;
 import jmusic.playlist.Playlist;
 import jmusic.ui.JDialogAdvanced;
+import jmusic.ui.jMusic;
 import org.gstreamer.Gst;
 
 /**
@@ -91,7 +78,13 @@ public class jMusicController {
 					//break;
 				}
 			}
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+		} catch (ClassNotFoundException ex){
+			System.err.println("Error while attempting to set the UI look and feel: " + ex.getLocalizedMessage());
+		} catch (InstantiationException ex){
+			System.err.println("Error while attempting to set the UI look and feel: " + ex.getLocalizedMessage());
+		} catch (IllegalAccessException ex){
+			System.err.println("Error while attempting to set the UI look and feel: " + ex.getLocalizedMessage());
+		} catch (javax.swing.UnsupportedLookAndFeelException ex){
 			System.err.println("Error while attempting to set the UI look and feel: " + ex.getLocalizedMessage());
 		}
 		//</editor-fold>

@@ -40,7 +40,7 @@ public class FileFinder {
 		File fileArray[] = dir.listFiles(filter);
 		
 		// create an output list
-		ArrayList<File> fullList = new ArrayList<>();
+		ArrayList<File> fullList = new ArrayList<File>();
 			
 		if (fileArray != null){
 			// Sort the files into alphabetical order

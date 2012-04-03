@@ -460,40 +460,33 @@ public class jMusic extends javax.swing.JFrame {
 		AbstractButton button = (AbstractButton)evt.getSource();
 		String buttonName = button.getName();
 		
-		switch (buttonName) {
-			case "Play":
-				MusicPlayer mp = jMusicController.getMusicPlayer();
-				if (!mp.isPlaying()){
-					// If we arn't playing, then play a file
-					((JTablePlaylist)jTablePlaylist).play();
-				} else if (mp.isPaused()){
-					// If we are paused, then resume
-					jMusicController.getMusicPlayer().resume();
-				} else {
-					// If we aren't paused, then pause
-					jMusicController.getMusicPlayer().pause();
-				}
-				break;
-			case "Stop":
-				jMusicController.getMusicPlayer().stop();
-				button.setSelected(false);
-				break;
-			case "Forward":
-				((JTablePlaylist)jTablePlaylist).forward();
-				button.setSelected(false);
-				break;
-			case "Backward":
-				((JTablePlaylist)jTablePlaylist).backward();
-				button.setSelected(false);
-				break;
-			case "Settings":
-				Settings settings = new Settings();
-				settings.setVisible(true);
-				button.setSelected(false);
-				break;
-			default:
-				System.out.println("Unknown button: " + buttonName);
-				break;
+		if ("Play".equals(buttonName)) {
+			MusicPlayer mp = jMusicController.getMusicPlayer();
+			if (!mp.isPlaying()){
+				// If we arn't playing, then play a file
+				((JTablePlaylist)jTablePlaylist).play();
+			} else if (mp.isPaused()){
+				// If we are paused, then resume
+				jMusicController.getMusicPlayer().resume();
+			} else {
+				// If we aren't paused, then pause
+				jMusicController.getMusicPlayer().pause();
+			}
+		} else if ("Stop".equals(buttonName)) {
+			jMusicController.getMusicPlayer().stop();
+			button.setSelected(false);
+		} else if ("Forward".equals(buttonName)) {
+			((JTablePlaylist)jTablePlaylist).forward();
+			button.setSelected(false);
+		} else if ("Backward".equals(buttonName)) {
+			((JTablePlaylist)jTablePlaylist).backward();
+			button.setSelected(false);
+		} else if ("Settings".equals(buttonName)) {
+			Settings settings = new Settings();
+			settings.setVisible(true);
+			button.setSelected(false);
+		} else {
+			System.out.println("Unknown button: " + buttonName);
 		}
 	}//GEN-LAST:event_toggleButtonPress
 

@@ -25,9 +25,9 @@ import java.io.File;
 public class FileCompareSize extends FileCompare {
 	@Override
 	public int doCompare(Object file1, Object file2) {
-		long file1Size = ((File)file1).length();
-		long file2Size = ((File)file2).length();
+		Long file1Size = ((File)file1).length();
+		Long file2Size = ((File)file2).length();
 		
-		return (Long.compare(file1Size, file2Size));
+		return file1Size.compareTo(file2Size);
 	}
 }

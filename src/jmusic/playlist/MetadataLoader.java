@@ -62,8 +62,8 @@ public class MetadataLoader {
 	}
 	
 	public Metadata loadMetadata(File file) {
-		tags = new ArrayList<>();
-        metadataPlaybin.setInputFile(file);
+		tags = new ArrayList<TagList>();
+		metadataPlaybin.setInputFile(file);
 		metadataPlaybin.setState(State.PLAYING);
 		ready = false;
 		StateChangeReturn type = metadataPlaybin.setState(State.NULL);
